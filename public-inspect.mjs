@@ -28,9 +28,9 @@ export async function compilerReadiness() {
       if (probe.code === 0 && `${probe.stdout}\n${probe.stderr}`.includes(expected)) {
         return { ready: true, compiler: expected, image: `embedded-compact:${expected}`, execution: 'service-process' };
       }
-      return { ready: false, compiler: expected, image: `embedded-compact:${expected}`, code: 'COMPILER_VERSION_MISMATCH' };
-    } catch {
-      return { ready: false, compiler: process.env.CPG_COMPILER_VERSION || '0.31.1', image: `embedded-compact:${process.env.CPG_COMPILER_VERSION || '0.31.1'}`, code: 'COMPILER_SERVICE_UNAVAILABLE' };
+      return { ready: false, compiler: expected, image: `embedded-compact:${expected}`, code: 'COMPILER_VERSION_MISMATCH', diagnostic: `Compiler version probe exited ${probe.code}; output: ${(probe.stdout + probe.stderr).trim().slice(-500)}` };
+    } catch (error) {
+      return { ready: false, compiler: process.env.CPG_COMPILER_VERSION || '0.31.1', image: `embedded-compact:${process.env.CPG_COMPILER_VERSION || '0.31.1'}`, code: 'COMPILER_SERVICE_UNAVAILABLE', diagnostic: error.details || error.message };
     }
   }
   try {
@@ -78,7 +78,9 @@ function run(command, args, timeoutMs = 30_000, stdinData = null, maxOutputBytes
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
-      reject(new GateError('PROCESS_START_FAILED', 'The isolated compiler service is unavailable.'));
+      const failure = new GateError('PROCESS_START_FAILED', 'The isolated compiler service is unavailable.');
+      failure.details = error.message;
+      reject(failure);
     });
 
     child.on('close', code => {

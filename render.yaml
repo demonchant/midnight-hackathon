@@ -6,7 +6,7 @@ services:
     region: oregon
     dockerfilePath: ./deploy/Dockerfile.render
     dockerContext: .
-    healthCheckPath: /api/status
+    healthCheckPath: /healthz
     numInstances: 1
     envVars:
       - key: CPG_PUBLIC_HOST

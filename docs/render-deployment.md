@@ -8,7 +8,7 @@ Render runs a single Docker web service from `render.yaml` and `deploy/Dockerfil
 
 This is a materially weaker isolation boundary than the Docker/Compose profile: uploaded Compact source is parsed by an unprivileged compiler subprocess within the web service's Render container, which shares the app's service-level CPU, memory, and network. Request size, single-job concurrency, per-client/global rate limits, and compiler timeout still apply. The demo warns users to submit sample or otherwise non-sensitive source only. Production teams should use the CLI/self-hosted workflow or the Docker-sandbox profile for confidential sources.
 
-The service binds to Render's `PORT` on `0.0.0.0`, exposes `/api/status` as its health check, runs one instance, and trusts Render's forwarded client IP from the first `X-Forwarded-For` entry for rate limiting. The on-screen app never deploys a visitor's contract.
+The service binds to Render's `PORT` on `0.0.0.0`, exposes `/healthz` as its lightweight process health check, runs one instance, and trusts Render's forwarded client IP from the first `X-Forwarded-For` entry for rate limiting. `/api/status` independently reports compiler readiness and includes a diagnostic when the compiler is unavailable. The on-screen app never deploys a visitor's contract.
 
 The Docker image installs `unzip` because `compact update` uses it to extract the pinned compiler toolchain. Keep this system dependency in both `deploy/Dockerfile.render` and `deploy/Dockerfile.compiler` so the Render and isolated-compiler builds install the same toolchain successfully.
 
@@ -23,7 +23,7 @@ Included bandwidth and build-pipeline allowances depend on the current Render wo
 1. Confirm `main` on `https://github.com/demonchant/midnight-hackathon` contains this project at the repository root. The repository root has `render.yaml` and `deploy/Dockerfile.render`.
 2. In Render, choose **New → Blueprint** and connect `demonchant/midnight-hackathon`. Select `main` and the root `render.yaml`. Render reads the Dockerfile path and build context from the blueprint. It creates one Oregon web service on the `1c-2g` plan and configures `/api/status` as the health check.
 3. Before confirming creation, verify the service is `compact-privacy-change-gate`, plan `1c-2g`, one instance, no disk/database/add-on, and the displayed rate and possible usage charges are acceptable. Do not add Blockfrost, wallet, or other secrets.
-4. Wait for the Docker build and health check. A healthy `/api/status` must say `ready: true`, compiler `0.31.1`, and `compilerExecution: service-process`.
+4. Wait for the Docker build and `/healthz` check. Then open `/api/status`; it must say `ready: true`, compiler `0.31.1`, and `compilerExecution: service-process`. If it reports `ready: false`, use its `diagnostic` field to troubleshoot compiler execution.
 5. From a trusted local checkout, run `PUBLIC_BASE_URL=https://<service>.onrender.com npm run verify:hosted`. It must confirm the landing and upload pages, HTTPS/security headers, a compiler-backed PASS, a schema-change BLOCKED result, compiler-error distinction, and no contract deployment route. Open the URL in a separate browser/device and try both built-in sample buttons.
 6. Check Render logs, memory use, the health page and Billing usage. Share the URL only after all checks pass. Record the exact URL and check output in `docs/verification-report.md` and the AKINDO submission.
 7. After judging, suspend or delete the service and verify billing stops.

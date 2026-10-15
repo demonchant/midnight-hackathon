@@ -87,6 +87,11 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && req.url === '/healthz') {
+    json(res, 200, { ok: true });
+    return;
+  }
+
   const staticFiles = {
     '/landing.css': ['public/landing.css', 'text/css; charset=utf-8'],
     '/upload.js': ['public/upload.js', 'text/javascript; charset=utf-8'],
@@ -118,6 +123,7 @@ const server = createServer(async (req, res) => {
       compilerExecution: compiler.execution || 'disposable-container',
       compiler: compiler.compiler,
       compilerImage: compiler.image,
+      ...(compiler.diagnostic ? { diagnostic: compiler.diagnostic } : {}),
       ...(compiler.code ? { code: compiler.code } : {}),
       maxSourceBytes: 256 * 1024,
       maxPolicyBytes: 64 * 1024,
