@@ -25,10 +25,12 @@ export async function compilerReadiness() {
     try {
       const probe = await run(COMPACT_BIN, ['compile', '--version'], 5000, null, 1024, true);
       const expected = process.env.CPG_COMPILER_VERSION || '0.31.1';
-      if (probe.code === 0 && `${probe.stdout}\n${probe.stderr}`.includes(expected)) {
+      // run() omits `code` on successful exits and includes it only for
+      // allowed nonzero exits. Treat an absent code as the normal exit 0.
+      if (probe.code === undefined && `${probe.stdout}\n${probe.stderr}`.includes(expected)) {
         return { ready: true, compiler: expected, image: `embedded-compact:${expected}`, execution: 'service-process' };
       }
-      return { ready: false, compiler: expected, image: `embedded-compact:${expected}`, code: 'COMPILER_VERSION_MISMATCH', diagnostic: `Compiler version probe exited ${probe.code}; output: ${(probe.stdout + probe.stderr).trim().slice(-500)}` };
+      return { ready: false, compiler: expected, image: `embedded-compact:${expected}`, code: 'COMPILER_VERSION_MISMATCH', diagnostic: `Compiler version probe exited ${probe.code ?? 0}; output: ${(probe.stdout + probe.stderr).trim().slice(-500)}` };
     } catch (error) {
       return { ready: false, compiler: process.env.CPG_COMPILER_VERSION || '0.31.1', image: `embedded-compact:${process.env.CPG_COMPILER_VERSION || '0.31.1'}`, code: 'COMPILER_SERVICE_UNAVAILABLE', diagnostic: error.details || error.message };
     }
