@@ -18,8 +18,8 @@ Included bandwidth and build-pipeline allowances depend on the current Render wo
 
 ## Deploy after approval
 
-1. Ensure the current source is on the public, writable submission repository. The current local Git remote differs; do not select another repository by assumption.
-2. In Render, choose **New: Blueprint** and connect the submission repository. Select `render.yaml` at the repository root. The blueprint specifies the Dockerfile, `1c-2g` plan, Oregon region, one instance, and compiler/health-check environment values.
+1. Confirm `main` on `https://github.com/demonchant/midnight-hackathon` contains this project at the repository root. The repository root has `render.yaml` and `deploy/Dockerfile.render`.
+2. In Render, choose **New → Blueprint** and connect `demonchant/midnight-hackathon`. Select `main` and the root `render.yaml`. Render reads the Dockerfile path and build context from the blueprint. It creates one Oregon web service on the `1c-2g` plan and configures `/api/status` as the health check.
 3. Before confirming creation, verify the service is `compact-privacy-change-gate`, plan `1c-2g`, one instance, no disk/database/add-on, and the displayed rate and possible usage charges are acceptable. Do not add Blockfrost, wallet, or other secrets.
 4. Wait for the Docker build and health check. A healthy `/api/status` must say `ready: true`, compiler `0.31.1`, and `compilerExecution: service-process`.
 5. From a trusted local checkout, run `PUBLIC_BASE_URL=https://<service>.onrender.com npm run verify:hosted`. It must confirm the landing and upload pages, HTTPS/security headers, a compiler-backed PASS, a schema-change BLOCKED result, compiler-error distinction, and no contract deployment route. Open the URL in a separate browser/device and try both built-in sample buttons.
@@ -32,8 +32,8 @@ The hostname is assigned by Render after service creation; no real URL exists un
 
 - Blueprint and Render Dockerfile are prepared locally; Render has not built them.
 - The real Compact compiler/browser path is not verified in this Windows environment. CI is configured to exercise the embedded compiler path on Linux, but no successful hosted CI run or Render deployment is claimed.
-- The requested GitHub submission URL differs from the configured local remote.
-- Public deployment awaits approval of the exact Render plan/order and repository access. No Mainnet deployment applies to this product.
+- The GitHub repository is `demonchant/midnight-hackathon`; its root is this project, including the Blueprint.
+- The Blueprint is ready, but a Render service has not been created. Creating it requires access to the user's Render account and starts a paid `1c-2g` compute instance. No Mainnet deployment applies to this product.
 
 ## Official Render documentation checked 2026-10-15
 

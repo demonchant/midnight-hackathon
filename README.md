@@ -4,6 +4,18 @@ A local-first gate for reviewing changes to the public ledger schema emitted by 
 
 This is a schema change gate, not a contract security or privacy certification. It does not prove contract logic safe, determine whether an approved field is appropriate, or assess transaction metadata.
 
+## The problem and the fix
+
+Compact contracts can change what they expose on the public ledger as their source or compiler version changes. A code review may miss that a field was added, removed, renamed, or changed. This can break integrations or disclose state the team did not intend to make public.
+
+The gate runs the real Compact compiler, reads the public ledger schema from the compiler's generated metadata, and compares it with a policy the team has reviewed. It reports **PASS** when the observed schema and pinned toolchain match. It reports **BLOCKED** when a public field or toolchain version differs from policy. A compiler error is reported separately as a compilation failure. Teams can run the CLI locally or make the same check part of CI before merging.
+
+## Use the hosted demo
+
+After deployment, open the Render URL and choose **Inspect a schema**. The built-in passing example demonstrates a match; the schema-change example adds an unapproved public `revision` field and should be blocked. Users can also upload one `.compact` source file and one reviewed JSON policy. The hosted demo compiles uploads temporarily and does not retain them in application logs. Because its compiler runs as a subprocess inside the web service, use sample or non-sensitive source only. The Render Blueprint is ready, but the service still needs to be created in the Render account; there is no live URL yet.
+
+To use the gate for a real project, first compile the contract and review the compiler-generated ledger fields with the team. Write a policy that records the approved fields and pinned versions with a reason for each field. Run the gate from the CLI or CI on every proposed change. Review a reported difference before changing the policy; do not automatically approve new fields just to make a build pass.
+
 ## Verification record
 
 The verification results below are historical results recorded on 2026-10-14. The current Windows environment was checked again on 2026-10-15; current outcomes and limitations are in [the verification report](docs/verification-report.md). The current public API integration and compiler preflight did **not** pass in this environment because Docker Desktop's Linux engine is stopped and WSL access was denied.
