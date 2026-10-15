@@ -1,50 +1,56 @@
-# Screen recording: Compact Privacy Change Gate
+# Hosted demo and video pitch guide
+
+**Live app:** <https://compact-privacy-change-gate.onrender.com/>  
+**Interactive deck:** <https://compact-privacy-change-gate.onrender.com/deck>  
+**Target length:** about 2 minutes
 
 ## Before recording
 
-Use the project directory in WSL. The public compiler image and real upload API have been verified locally, but there is no verified Mainnet deployment to show. Do not show or narrate wallet credentials, seed phrases, private keys, Blockfrost tokens, secret values, or deployment configuration. Keep the recording on the schema inspection app; it does not need a wallet.
+- Open the live app and `/app` in a clean browser window. Check the landing page reports Compact 0.31.1 ready.
+- On `/app`, click both built-in examples once. Confirm the first is **PASS** and the second is **BLOCKED** for unapproved `revision`.
+- Use the `/deck` presentation to review the narrative; it supports arrow keys and Print / save PDF.
+- Hide personal tabs, credentials, account information, and unrelated desktop content. Use only the built-in examples; do not upload private source or secrets.
+- Capture the actual result panels long enough for the status and changed field to be legible. If the service is unavailable or reports a different result, stop and resolve it before recording.
 
-Start the app in a WSL terminal, then open the indicated URL in a browser:
+## Two-minute narration and screen path
 
-```bash
-cd /mnt/c/Users/pinch/Downloads/wavehacks/wavehacks-repo/compact-privacy-change-gate
-CPG_PUBLIC_HOST=127.0.0.1 CPG_PUBLIC_PORT=4179 npm run start:public
-```
+### 0:00–0:20 — Problem and user
 
-Open `http://127.0.0.1:4179/app`. Use a clean browser window and hide unrelated tabs and terminals. The project examples are under `examples/`.
+**Show:** Project landing page, title and problem section.
 
-## Scene 1 — What the gate checks
+**Say:** “Compact gives contract developers tools for private computation, but contracts still have compiler-reported public ledger state. A source change or compiler upgrade can add or alter a public field. Compact Privacy Change Gate helps contract teams catch that change before it ships.”
 
-**Capture:** Landing page or `/app` introduction and upload form.
+### 0:20–0:40 — How the gate works
 
-**Voiceover:** “Compact Privacy Change Gate checks what the Compact compiler actually produces for a contract’s public ledger. I provide the source and the policy I reviewed, and the gate reports whether the observed schema and pinned toolchain match. This is a change check, not a security audit.”
+**Show:** Scroll through the workflow steps.
 
-## Scene 2 — Upload an approved source and policy
+**Say:** “The gate runs the actual Compact compiler, reads the generated contract metadata, and compares the ledger layout and pinned toolchain with a policy the team reviewed. This is the same kind of check a developer can run locally or add to CI.”
 
-**Capture:** On `/app`, select `examples/ledger-schema-smoke.compact` as the Compact source and `examples/ledger-schema-smoke.policy.json` as the reviewed policy. Submit and wait for the compiler-backed report. Keep the result visible long enough to read the PASS status, ledger summary, and toolchain.
+### 0:40–1:05 — Baseline PASS
 
-**Voiceover:** “For the baseline, I’m uploading the smoke contract and its reviewed policy. The pinned Compact compiler generates the metadata used by the gate. The public Render demo runs it as an unprivileged subprocess and asks visitors to use sample or otherwise non-sensitive source. The report comes from the compiler’s generated metadata, then compares that result with the policy I supplied. This baseline matches.”
+**Show:** Click **Try the live compiler demo**, then **Run passing example**. Keep the report visible.
 
-## Scene 3 — Introduce an unapproved public field
+**Say:** “Here the baseline source compiles. Its observed public ledger matches the supplied policy, so the gate passes. The report includes the compiler-observed fields and version information.”
 
-**Capture:** Select `examples/ledger-schema-smoke-mutated.compact`, keep the original `examples/ledger-schema-smoke.policy.json`, submit, and show the blocked report with the new `revision` ledger field. Do not edit or regenerate the policy during this scene.
+### 1:05–1:35 — Changed schema BLOCKED
 
-**Voiceover:** “Now the source adds a public `revision` field, while I keep the original policy. The compiler sees that field in the generated ledger schema, and the gate blocks the change because it was not reviewed and approved in this policy.”
+**Show:** Click **Run schema-change example**. Point to `revision` in the report.
 
-## Scene 4 — Explain the result
+**Say:** “Now the source adds a public `revision` field, and I keep the same policy. The real compiler reports the new field. Because it has not been reviewed and approved in the policy, the gate blocks the change.”
 
-**Capture:** Hold on the blocked result, then scroll enough to show the diff and report language distinguishing schema matching from a security audit.
+### 1:35–1:50 — Compiler errors stay distinct
 
-**Voiceover:** “That gives reviewers a clear point to investigate before accepting a schema change. A pass only means the observed ledger and toolchain match this policy. It does not prove the contract is private, secure, or ready for production. The policy still needs human review, and the contract needs its own testing and security work.”
+**Say:** “If Compact cannot compile the source, the gate reports a compilation failure. It never labels a compiler failure as a policy block.”
 
-## Exact checks behind the recording
+### 1:50–2:00 — Honest boundary
 
-These are the local, reproducible checks for what the recording shows:
+**Show:** Return to the trust-boundary note.
 
-```bash
-npm run verify:compiler
-npm run test:public-compiler
-npm run test:public-api
-```
+**Say:** “This is a focused schema and toolchain check, not a security audit or privacy certification. The hosted demo is for sample or non-sensitive code. It does not deploy contracts or submit transactions.”
 
-The matching and mutation results were exercised through the public API with the actual pinned compiler image. There is no Mainnet deployment evidence at the time of this script. Do not add a fabricated address, transaction, or claim to the video.
+## Submission notes
+
+- Use the recorded hosted verification in [the evidence index](../evidence/README.md) to support the API/compiler claims.
+- The `/deck` page can be exported as a PDF using its Print / save PDF control.
+- Record and upload the video/video pitch through the signed-in AKINDO entry. Keep the actual final video and submission receipt; this guide does not mean either has been submitted.
+- Do not claim customer adoption, a Mainnet contract, production security, or a transaction outcome.

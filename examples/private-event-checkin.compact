@@ -1,0 +1,28 @@
+// SPDX-License-Identifier: Apache-2.0
+// Demo scenario: an event organizer publishes an event status and aggregate
+// check-in count; an attendee proves knowledge of an invite code via a witness.
+// This intentionally omits one-time ticket tracking and is not production auth.
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+export ledger event_name: Opaque<"string">;
+export ledger check_in_count: Uint<32>;
+export ledger event_open: Boolean;
+export ledger invite_commitment: Bytes<32>;
+
+// The attendee supplies this private value locally when running the circuit.
+witness invite_code(): Bytes<32>;
+
+constructor(name: Opaque<"string">, code: Bytes<32>) {
+  event_name = disclose(name);
+  event_open = true;
+  invite_commitment = disclose(persistentHash<Bytes<32>>(code));
+}
+
+export circuit check_in(): [] {
+  const code = invite_code();
+  assert(event_open, "Check-in is closed");
+  assert(persistentHash<Bytes<32>>(code) == invite_commitment, "Invalid invitation code");
+  check_in_count = (check_in_count + 1) as Uint<32>;
+}

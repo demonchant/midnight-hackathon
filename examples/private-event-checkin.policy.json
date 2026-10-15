@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "toolchain": {
+    "compiler": "0.31.1",
+    "language": "0.23.0",
+    "runtime": "0.16.0"
+  },
+  "ledger": [
+    {
+      "name": "event_name",
+      "index": 0,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Opaque",
+        "tsType": "string"
+      },
+      "reason": "Public event label, intentionally disclosed to attendees and indexers. Do not put attendee identity or other personal data here."
+    },
+    {
+      "name": "check_in_count",
+      "index": 1,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 4294967295
+      },
+      "reason": "Public aggregate count used to demonstrate state updates without publishing attendee names. The demo does not prevent the same invite code being reused."
+    },
+    {
+      "name": "event_open",
+      "index": 2,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Boolean"
+      },
+      "reason": "Public event status so the circuit can reject check-ins after the organizer closes the event."
+    },
+    {
+      "name": "invite_commitment",
+      "index": 3,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "reason": "Public hash commitment checked against a private witness. Use a high-entropy random code; this demo is illustrative and does not provide one-time ticket security."
+    }
+  ]
+}

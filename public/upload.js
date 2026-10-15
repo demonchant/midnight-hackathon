@@ -13,7 +13,7 @@ const safe = value => { const node = document.createElement('span'); node.textCo
 async function inspect(sourceName, sourceText, policyName, policyText) {
   submit.disabled = true;
   report.hidden = true;
-  status.textContent = 'Compiling in an isolated container and comparing compiler metadata…';
+  status.textContent = 'Compiling temporarily with Compact and comparing generated metadata…';
   try {
     const response = await fetch('/api/inspect', {
       method: 'POST', headers: { 'content-type': 'application/json' },
@@ -38,16 +38,29 @@ async function inspect(sourceName, sourceText, policyName, policyText) {
 }
 
 async function runSample(kind) {
-  const sourcePath = kind === 'pass' ? 'ledger-schema-smoke.compact' : 'ledger-schema-smoke-mutated.compact';
+  const event = kind.startsWith('event-');
+  const blocked = kind.endsWith('block');
+  const sourcePath = event
+    ? (blocked ? 'private-event-checkin-mutated.compact' : 'private-event-checkin.compact')
+    : (blocked ? 'ledger-schema-smoke-mutated.compact' : 'ledger-schema-smoke.compact');
+  const policyPath = event ? 'private-event-checkin.policy.json' : 'ledger-schema-smoke.policy.json';
   const [sourceResponse, policyResponse] = await Promise.all([
-    fetch(`/samples/${sourcePath}`), fetch('/samples/ledger-schema-smoke.policy.json')
+    fetch(`/samples/${sourcePath}`), fetch(`/samples/${policyPath}`)
   ]);
-  if (!sourceResponse.ok || !policyResponse.ok) throw new Error('Could not load the built-in example.');
-  await inspect(sourcePath, await sourceResponse.text(), 'ledger-schema-smoke.policy.json', await policyResponse.text());
+  if (!sourceResponse.ok || !policyResponse.ok) throw new Error('Could not load the built-in example. Refresh after the latest app deploy, then try again.');
+  await inspect(sourcePath, await sourceResponse.text(), policyPath, await policyResponse.text());
 }
 
-document.querySelector('#sample-pass').addEventListener('click', () => runSample('pass').catch(error => { status.textContent = error.message; }));
-document.querySelector('#sample-block').addEventListener('click', () => runSample('block').catch(error => { status.textContent = error.message; }));
+for (const [id, kind] of [
+  ['#sample-pass', 'pass'], ['#sample-block', 'block'],
+  ['#sample-event-pass', 'event-pass'], ['#sample-event-block', 'event-block']
+]) {
+  document.querySelector(id).addEventListener('click', async () => {
+    status.textContent = 'Loading the built-in Compact sample…';
+    try { await runSample(kind); }
+    catch (error) { status.textContent = error instanceof Error ? error.message : 'Could not run the built-in sample.'; }
+  });
+}
 
 form.addEventListener('submit', async event => {
   event.preventDefault();

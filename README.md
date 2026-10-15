@@ -10,20 +10,24 @@ Compact contracts can change what they expose on the public ledger as their sour
 
 The gate runs the real Compact compiler, reads the public ledger schema from the compiler's generated metadata, and compares it with a policy the team has reviewed. It reports **PASS** when the observed schema and pinned toolchain match. It reports **BLOCKED** when a public field or toolchain version differs from policy. A compiler error is reported separately as a compilation failure. Teams can run the CLI locally or make the same check part of CI before merging.
 
-## Use the hosted demo
+## Live demo and presentation
 
-After deployment, open the Render URL and choose **Inspect a schema**. The built-in passing example demonstrates a match; the schema-change example adds an unapproved public `revision` field and should be blocked. Users can also upload one `.compact` source file and one reviewed JSON policy. The hosted demo compiles uploads temporarily and does not retain them in application logs. Because its compiler runs as a subprocess inside the web service, use sample or non-sensitive source only. The Render Blueprint is ready, but the service still needs to be created in the Render account; there is no live URL yet.
+- Project showcase: [compact-privacy-change-gate.onrender.com](https://compact-privacy-change-gate.onrender.com/)
+- Guided compiler demo: [/app](https://compact-privacy-change-gate.onrender.com/app)
+- Browser slide deck: [/deck](https://compact-privacy-change-gate.onrender.com/deck) (use **Print / save PDF** to export)
+
+Run the built-in smoke pair, then the event check-in example and its privacy regression. The event contract keeps an attendee's invite code in a private witness, checks its hash against a public commitment, and increments an aggregate public count. Its reviewed policy is [`examples/private-event-checkin.policy.json`](examples/private-event-checkin.policy.json); adding a public `attendee_email` field should be blocked. This teaching example does not stop invite-code reuse and is not production ticketing or authentication. Users may also upload one `.compact` source file and one reviewed JSON policy. The hosted demo compiles uploads temporarily and does not retain them in application logs. Because its compiler runs as a subprocess inside the web service, use sample or non-sensitive source only.
 
 To use the gate for a real project, first compile the contract and review the compiler-generated ledger fields with the team. Write a policy that records the approved fields and pinned versions with a reason for each field. Run the gate from the CLI or CI on every proposed change. Review a reported difference before changing the policy; do not automatically approve new fields just to make a build pass.
 
 ## Verification record
 
-The verification results below are historical results recorded on 2026-10-14. The current Windows environment was checked again on 2026-10-15; current outcomes and limitations are in [the verification report](docs/verification-report.md). The current public API integration and compiler preflight did **not** pass in this environment because Docker Desktop's Linux engine is stopped and WSL access was denied.
+The local verification history and current hosted verification are recorded separately in [the verification report](docs/verification-report.md). The Windows host could not run its local Docker/WSL flows; the actual hosted Render compiler/API path was subsequently verified independently on 2026-10-15.
 
 - **VERIFIED:** Compact 0.31.1 compiled the smoke source and matched its reviewed policy; the mutated source was blocked for an unapproved public `revision` field. The private-access-counter was also compiled from source and its generated metadata matched its checked-in policy during the Mainnet dry preflight. The local runtime witness demonstration and local devnet transaction have not been independently rerun in this verification.
 - **VERIFIED:** the public compiler image was built and verified, and the public API exercised matching and mutated uploads using actual compiler metadata, upload size limits, invalid JSON handling, timeout responses, and container cleanup.
 - **NO PRODUCT CONTRACT REQUIRED:** the gate is an off-chain service. Its former Mainnet submission path deployed only the unrelated `private-access-counter` teaching demo and has been removed to avoid misrepresenting that demo as the product. No product contract has been deployed or submitted to Mainnet.
-- **NOT VERIFIED:** hosted public deployment. Browser E2E tests cannot launch Chromium because the WSL environment lacks `libnspr4.so`; Playwright's browser download succeeded, but installing OS dependencies stopped because sudo authentication is unavailable.
+- **VERIFIED (hosted API):** Render HTTPS page, compiler readiness, compiler-backed matching PASS, mutated-schema BLOCKED, compiler-error distinction, and absence of a local contract deployment route passed `npm run verify:hosted` on 2026-10-15. This does not replace a real browser/device review or a GitHub Actions run.
 
 ## Run the local compiler-backed product in WSL
 
@@ -135,7 +139,7 @@ Compact's official compiler repository currently lists no published security adv
 
 ## Mainnet and judge demo status
 
-The gate does not require a contract and has no deployment on Midnight Mainnet. The proposed judge demo host is Render; the `1c-2g` instance currently costs up to $25/month while active, prorated by the second. See [Render deployment](docs/render-deployment.md) and [the Mainnet decision](docs/mainnet-deployment.md). The app has not been published and has no public URL. See [judge readiness](docs/judge-readiness.md) for product framing and evidence against the requested criteria.
+The gate is an off-chain developer tool and has no deployment on Midnight Mainnet. Its Render demo is live at the URL above; the `1c-2g` instance is a paid service. See [Render deployment](docs/render-deployment.md), [the Mainnet decision](docs/mainnet-deployment.md), and [judge readiness](docs/judge-readiness.md). The public demo compiles Compact source; it does not deploy visitor contracts or claim a network transaction.
 
 
 ## Deploy the judge demo to Render

@@ -37,14 +37,26 @@ assert.equal(status.maxInspectionsPerClientPerWindow, 8);
 assert.equal(status.maxInspectionsGlobalPerWindow, 32);
 assert.equal(status.maxConcurrentInspections, 1);
 
+for (const sample of [
+  '/samples/ledger-schema-smoke.compact',
+  '/samples/ledger-schema-smoke-mutated.compact',
+  '/samples/ledger-schema-smoke.policy.json',
+  '/samples/private-event-checkin.compact',
+  '/samples/private-event-checkin-mutated.compact',
+  '/samples/private-event-checkin.policy.json'
+]) {
+  const response = await request(sample, {});
+  assert.equal(response.status, 200, `built-in sample must be served: ${sample}`);
+}
+
 const policyText = await readFile(new URL('./examples/ledger-schema-smoke.policy.json', import.meta.url), 'utf8');
 const matchingSource = await readFile(new URL('./examples/ledger-schema-smoke.compact', import.meta.url), 'utf8');
 const mutatedSource = await readFile(new URL('./examples/ledger-schema-smoke-mutated.compact', import.meta.url), 'utf8');
 const invalidSource = await readFile(new URL('./examples/invalid-compiler-input.compact', import.meta.url), 'utf8');
-const upload = (sourceName, sourceText) => request('/api/inspect', {
+const upload = (sourceName, sourceText, policyName = 'ledger-schema-smoke.policy.json', chosenPolicy = policyText) => request('/api/inspect', {
   method: 'POST',
   headers: { 'content-type': 'application/json' },
-  body: JSON.stringify({ sourceName, sourceText, policyName: 'ledger-schema-smoke.policy.json', policyText })
+  body: JSON.stringify({ sourceName, sourceText, policyName, policyText: chosenPolicy })
 });
 
 const matching = await upload('ledger-schema-smoke.compact', matchingSource);
@@ -63,7 +75,20 @@ const compileError = await invalid.json();
 assert.equal(compileError.result, 'ERROR');
 assert.equal(compileError.code, 'COMPILATION_FAILED');
 
+const eventPolicyText = await readFile(new URL('./examples/private-event-checkin.policy.json', import.meta.url), 'utf8');
+const eventSource = await readFile(new URL('./examples/private-event-checkin.compact', import.meta.url), 'utf8');
+const eventMutation = await readFile(new URL('./examples/private-event-checkin-mutated.compact', import.meta.url), 'utf8');
+const eventPass = await upload('private-event-checkin.compact', eventSource, 'private-event-checkin.policy.json', eventPolicyText);
+assert.equal(eventPass.status, 200);
+assert.equal((await eventPass.json()).result, 'PASS');
+
+const eventBlocked = await upload('private-event-checkin-mutated.compact', eventMutation, 'private-event-checkin.policy.json', eventPolicyText);
+assert.equal(eventBlocked.status, 409);
+const eventReport = await eventBlocked.json();
+assert.equal(eventReport.result, 'BLOCKED');
+assert(eventReport.changes.some(change => change.kind === 'unapproved' && change.name === 'attendee_email'));
+
 const noDeploymentRoute = await request('/api/local-contract/run', { method: 'POST' });
 assert.equal(noDeploymentRoute.status, 404, 'the public upload service must not expose the local contract runner');
 
-console.log(`PASS: deployed app verified at ${base.origin} (HTTPS, ready compiler, baseline PASS, schema BLOCKED, compiler error, no local deployment route).`);
+console.log(`PASS: deployed app verified at ${base.origin} (HTTPS, ready compiler, all samples served, baseline and event PASS, schema/privacy BLOCKED, compiler error, no local deployment route).`);

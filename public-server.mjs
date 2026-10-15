@@ -81,6 +81,12 @@ const server = createServer(async (req, res) => {
     return;
   }
 
+  if (req.method === 'GET' && ['/deck', '/deck/'].includes(req.url)) {
+    res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+    res.end(await readFile(path.join(here, 'public/deck.html')));
+    return;
+  }
+
   if (req.method === 'GET' && ['/app', '/app/'].includes(req.url)) {
     res.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
     res.end(await readFile(path.join(here, 'public/upload.html')));
@@ -94,12 +100,19 @@ const server = createServer(async (req, res) => {
 
   const staticFiles = {
     '/landing.css': ['public/landing.css', 'text/css; charset=utf-8'],
+    '/showcase.css': ['public/showcase.css', 'text/css; charset=utf-8'],
+    '/showcase.js': ['public/showcase.js', 'text/javascript; charset=utf-8'],
+    '/deck.css': ['public/deck.css', 'text/css; charset=utf-8'],
+    '/deck.js': ['public/deck.js', 'text/javascript; charset=utf-8'],
     '/upload.js': ['public/upload.js', 'text/javascript; charset=utf-8'],
     '/upload.css': ['public/upload.css', 'text/css; charset=utf-8'],
     '/privacy-gate-hero.png': ['public/privacy-gate-hero.png', 'image/png'],
     '/samples/ledger-schema-smoke.compact': ['examples/ledger-schema-smoke.compact', 'text/plain; charset=utf-8'],
     '/samples/ledger-schema-smoke.policy.json': ['examples/ledger-schema-smoke.policy.json', 'application/json; charset=utf-8'],
-    '/samples/ledger-schema-smoke-mutated.compact': ['examples/ledger-schema-smoke-mutated.compact', 'text/plain; charset=utf-8']
+    '/samples/ledger-schema-smoke-mutated.compact': ['examples/ledger-schema-smoke-mutated.compact', 'text/plain; charset=utf-8'],
+    '/samples/private-event-checkin.compact': ['examples/private-event-checkin.compact', 'text/plain; charset=utf-8'],
+    '/samples/private-event-checkin.policy.json': ['examples/private-event-checkin.policy.json', 'application/json; charset=utf-8'],
+    '/samples/private-event-checkin-mutated.compact': ['examples/private-event-checkin-mutated.compact', 'text/plain; charset=utf-8']
   };
 
   if (req.method === 'GET' && staticFiles[req.url]) {

@@ -38,6 +38,9 @@ RUN compact compile /tmp/cpg-image-smoke.compact /tmp/cpg-image-smoke-output \
 WORKDIR /app
 COPY --chown=node:node core.mjs public-inspect.mjs public-server.mjs ./
 COPY --chown=node:node public/ ./public/
+RUN mkdir -p examples
+COPY --chown=node:node examples/ledger-schema-smoke.compact examples/ledger-schema-smoke-mutated.compact examples/private-event-checkin.compact examples/private-event-checkin-mutated.compact examples/
+COPY --chown=node:node examples/ledger-schema-smoke.policy.json examples/private-event-checkin.policy.json examples/
 
 USER node
 EXPOSE 10000

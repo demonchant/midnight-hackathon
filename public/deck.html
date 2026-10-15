@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Compact Privacy Change Gate — Pitch Deck</title>
+  <link rel="stylesheet" href="/deck.css">
+  <script src="/deck.js" defer></script>
+</head>
+<body>
+  <header class="deck-nav"><a href="/">← Project showcase</a><span>COMPACT PRIVACY CHANGE GATE · WAVE 2</span><a href="/app">Open live demo ↗</a></header>
+  <main id="slides">
+    <section class="slide cover" aria-label="Slide 1 of 7">
+      <div class="slide-tag">MIDNIGHT BUILDATHON · DEVELOPER TOOLING</div>
+      <div><div class="monogram">C</div><h1>Compact Privacy<br>Change Gate</h1><p class="subtitle">Make public ledger changes visible before they ship.</p></div>
+      <div class="cover-bottom"><span>Real Compact compiler · Reviewed disclosure policy · CI-ready gate</span><span class="live-state" id="live-state">Checking live compiler…</span></div>
+    </section>
+    <section class="slide" aria-label="Slide 2 of 7">
+      <div class="slide-tag">01 / THE PROBLEM</div><h2>Private contracts still have public state.</h2>
+      <p class="lead">A source edit or compiler upgrade can change the public ledger. That change may be easy to miss in a code review—and expensive to discover after release.</p>
+      <div class="two-col"><article class="panel"><span class="index">TODAY</span><h3>Schema changes hide in compiler output</h3><p>Reviewers have to know where to look and compare generated metadata by hand.</p></article><article class="panel accent"><span class="index">RISK</span><h3>Unexpected disclosure or broken clients</h3><p>An unreviewed public field can change what applications expose and what downstream code expects.</p></article></div>
+      <div class="slide-foot">For Compact contract authors, protocol teams, and reviewers.</div>
+    </section>
+    <section class="slide" aria-label="Slide 3 of 7">
+      <div class="slide-tag">02 / THE SOLUTION</div><h2>Turn the expected public schema into a reviewable policy.</h2>
+      <div class="steps"><article><b>1</b><div><h3>Compile the candidate</h3><p>Run the pinned Compact compiler on the actual source.</p></div></article><article><b>2</b><div><h3>Read the emitted ledger</h3><p>Inspect the compiler's generated contract metadata.</p></div></article><article><b>3</b><div><h3>Compare with reviewed policy</h3><p>Check fields and compiler/toolchain versions against the team's approved expectation.</p></div></article><article><b>4</b><div><h3>Pass, block, or report compiler failure</h3><p>Keep an unreviewed schema change from silently passing the gate.</p></div></article></div>
+      <div class="slide-foot">The same check can run in a local workflow or a pull-request CI job.</div>
+    </section>
+    <section class="slide" aria-label="Slide 4 of 7">
+      <div class="slide-tag">03 / LIVE PROOF</div><h2>One policy. Two real compiler outcomes.</h2>
+      <div class="two-col"><article class="panel pass"><span class="result">PASS</span><h3>Baseline source</h3><p>Compiler-observed public ledger matches the reviewed policy.</p></article><article class="panel block"><span class="result">BLOCKED</span><h3>Mutation adds <code>revision</code></h3><p>The original policy does not approve the new public field.</p></article></div>
+      <p class="lead small-lead">Hosted verification also confirms malformed Compact source returns a compilation error, distinct from a policy block.</p>
+      <a class="slide-button" href="/app">Run both examples in the live app ↗</a>
+    </section>
+    <section class="slide" aria-label="Slide 5 of 7">
+      <div class="slide-tag">04 / ENGINEERING</div><h2>Compiler-backed, bounded, inspectable.</h2>
+      <div class="metric-grid"><article><b>0.31.1</b><span>Pinned Compact compiler</span></article><article><b>256 KiB</b><span>Maximum uploaded source</span></article><article><b>1 at a time</b><span>Serialized compiler jobs</span></article><article><b>8 / 10 min</b><span>Per-client request limit</span></article></div>
+      <ul class="plain-list"><li>Uses compiler-generated metadata; no regex guess about source declarations.</li><li>Tracks schema and pinned compiler/language/runtime versions.</li><li>Hosted uploads are temporary and do not enter application logs.</li><li>CI and local CLI paths return a nonzero result for policy blocks.</li></ul>
+    </section>
+    <section class="slide" aria-label="Slide 6 of 7">
+      <div class="slide-tag">05 / PRIVACY BOUNDARY</div><h2>A precise claim is a stronger claim.</h2>
+      <div class="two-col"><article class="panel"><span class="index">THE GATE CHECKS</span><h3>Compiler-reported public state</h3><p>Whether the observed ledger and pinned toolchain match the policy supplied for that inspection.</p></article><article class="panel warning"><span class="index">THE GATE DOES NOT PROVE</span><h3>Overall security or privacy</h3><p>Contract logic, transaction metadata, policy appropriateness, and production readiness need separate review.</p></article></div>
+      <p class="lead small-lead">The Render demo runs the compiler as an unprivileged subprocess in the service container. Use built-in samples or source you are permitted to share; do not upload secrets.</p>
+    </section>
+    <section class="slide" aria-label="Slide 7 of 7">
+      <div class="slide-tag">06 / SUBMISSION FIT</div><h2>What is demonstrated—and what still needs evidence.</h2>
+      <div class="submission-grid"><article><b>ENGINEERING · 40%</b><p>Actual Compact compiler integration and schema-policy gate.</p></article><article><b>QA · 15%</b><p>Hosted pass, block, compiler-error, and readiness checks verified.</p></article><article><b>PRODUCT · 15%</b><p>Specific Compact developer/reviewer user and workflow.</p></article><article><b>UX · 15%</b><p>Hosted project page, guided examples, and upload path.</p></article><article><b>COMMUNICATION · 10%</b><p>Pitch deck and live demo path; entrant still records/submits the video.</p></article><article><b>VIABILITY · 5%</b><p>Open-source CLI/CI adoption path; customer validation is still needed.</p></article></div>
+      <p class="slide-foot final-foot">No wallet or contract deployment is part of this product. Confirm eligibility, repo topic, and AKINDO entry fields in the signed-in event page.</p>
+      <div class="final-actions"><a class="slide-button" href="/app">Try the live demo ↗</a><a href="/">Back to full project showcase</a></div>
+    </section>
+  </main>
+  <div class="deck-controls" aria-label="Presentation controls"><button id="previous" type="button" aria-label="Previous slide">←</button><span id="counter">1 / 7</span><button id="next" type="button" aria-label="Next slide">→</button><button id="print" type="button">Print / save PDF</button></div>
+</body>
+</html>
