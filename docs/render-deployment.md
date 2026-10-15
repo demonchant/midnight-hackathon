@@ -10,6 +10,8 @@ This is a materially weaker isolation boundary than the Docker/Compose profile: 
 
 The service binds to Render's `PORT` on `0.0.0.0`, exposes `/api/status` as its health check, runs one instance, and trusts Render's forwarded client IP from the first `X-Forwarded-For` entry for rate limiting. The on-screen app never deploys a visitor's contract.
 
+The Docker image installs `unzip` because `compact update` uses it to extract the pinned compiler toolchain. Keep this system dependency in both `deploy/Dockerfile.render` and `deploy/Dockerfile.compiler` so the Render and isolated-compiler builds install the same toolchain successfully.
+
 ## Cost and approval
 
 Recommended plan: one web service on Render `1c-2g` (1 CPU, 2 GB RAM), currently **US$25/month while running**, prorated by the second. That is the compute plan rate, not a guaranteed all-in bill ceiling. Render's Hobby workspace has no monthly workspace fee. Free web instances have 512 MB RAM, sleep after 15 idle minutes, and take about a minute to wake; they are not the selected plan for a judge-facing compiler demo. No database, persistent disk, custom domain, or second service is required. Render supplies an `onrender.com` hostname and HTTPS.
