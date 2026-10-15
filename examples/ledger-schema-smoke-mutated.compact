@@ -1,0 +1,10 @@
+pragma language_version 0.23;
+
+// Real source mutation used by the compiler-backed regression test.
+// The added public ledger field is intentionally absent from ledger-schema-smoke.policy.json.
+export ledger message: Opaque<"string">;
+export ledger revision: Opaque<"string">;
+
+export circuit storeMessage(newMessage: Opaque<"string">): [] {
+  message = disclose(newMessage);
+}

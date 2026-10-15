@@ -1,0 +1,72 @@
+name: Compact Privacy Change Gate CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Unit, compiler, API, and browser verification
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run deterministic tests
+        run: npm test
+
+      - name: Install supported Compact toolchain
+        shell: bash
+        run: |
+          curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/compact" update 0.31.1
+          "$HOME/.local/bin/compact" --version
+          "$HOME/.local/bin/compact" compile --version
+
+      - name: Check real compiler pass, policy block, and compiler error
+        run: npm run test:compiler
+
+      - name: Compile the private-state teaching contract and check its reviewed public ledger policy
+        run: npm run contract:gate
+
+      - name: Exercise the private witness and public state in the local Compact runtime
+        run: npm run contract:demo
+
+      - name: Build isolated public compiler image
+        run: npm run build:compiler
+
+      - name: Verify compiler image constraints and version
+        run: npm run verify:compiler
+
+      - name: Check direct public compiler path
+        run: npm run test:public-compiler
+
+      - name: Check Render's embedded compiler execution path
+        run: CPG_COMPILER_MODE=direct npm run test:public-compiler
+
+      - name: Check public upload API and cleanup
+        run: npm run test:public-api
+
+      - name: Install Chromium and system dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Check local browser workflow
+        run: npm run e2e
+
+      - name: Check judge-facing public upload browser workflow
+        run: npm run e2e:public

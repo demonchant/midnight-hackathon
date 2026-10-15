@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light"><title>Compact Privacy Change Gate</title>
+  <link rel="stylesheet" href="/styles.css"><script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="top"><a class="brand" href="/" aria-label="Compact Privacy Change Gate home"><span class="mark">C</span><span>COMPACT <b>·</b> CHANGE GATE</span></a><span id="connection" class="status"><i></i>Checking local setup</span></header>
+  <main>
+    <section class="hero"><p class="eyebrow">PUBLIC LEDGER REVIEW / LOCAL TOOL</p><h1>Know what your contract<br><em>makes public.</em></h1><p class="intro">Compile a real Compact contract, inspect its compiler-generated ledger schema, and catch unapproved public-state changes before they ship.</p></section>
+    <section class="panel">
+      <div class="panel-heading"><div><p class="eyebrow">01 — INSPECT A COMPILED CONTRACT</p><h2>Run the gate</h2></div><span class="local-tag">SOURCE STAYS LOCAL</span></div>
+      <p class="subtext">Paths are relative to the configured project root. The tool invokes your Compact CLI and fails closed if compilation or metadata parsing fails.</p>
+      <form id="inspect-form">
+        <label for="source">Compact source path</label><input id="source" name="source" value="examples/ledger-schema-smoke.compact" placeholder="contracts/my-contract.compact" required autocomplete="off" spellcheck="false">
+        <label for="policy">Reviewed policy path</label><input id="policy" name="policy" value="examples/ledger-schema-smoke.policy.json" placeholder="privacy-policy.json" required autocomplete="off" spellcheck="false">
+        <button id="submit" type="submit"><span>Compile &amp; compare</span><span aria-hidden="true">↗</span></button>
+      </form>
+      <div id="notice" class="notice" role="status" aria-live="polite">Waiting for local configuration.</div>
+    </section>
+    <section id="result" class="result" hidden aria-live="polite"></section>
+    <section class="panel contract-panel" aria-labelledby="contract-title">
+      <div class="panel-heading"><div><p class="eyebrow">02 / LOCAL MIDNIGHT DEVNET</p><h2 id="contract-title">Run the private witness path</h2></div><span class="local-tag">LOOPBACK ONLY</span></div>
+      <p class="subtext">After starting the pinned local node, proof server, and indexer with <code>npm run devnet:up</code>, this compiles and deploys a fresh contract locally, submits one proof-backed counter call, and reads public state back from the indexer. It never targets Preview, Preprod, or Mainnet.</p>
+      <button id="run-local-contract" type="button"><span>Deploy and verify locally</span><span aria-hidden="true">↗</span></button>
+      <div id="contract-notice" class="notice" role="status" aria-live="polite">Not run. Start the local devnet first. No transaction has been submitted.</div>
+      <pre id="contract-report" class="contract-report" hidden aria-live="polite"></pre>
+    </section>
+    <section class="howto"><p class="eyebrow">REVIEW FLOW</p><h2>Compile. Inspect. Decide.</h2><ol><li><b>Compile</b><span>Runs your configured Compact CLI against the selected source.</span></li><li><b>Compare</b><span>Checks the compiler's public ledger fields and pinned toolchain against your reviewed policy.</span></li><li><b>Review</b><span>Any unapproved, removed, changed, or toolchain-drifted item blocks the gate. Update policy only after human review.</span></li></ol><p>Use the included smoke contract and policy for the first run. For another contract, enter paths inside the configured project root and write a policy from its actual compiler metadata.</p></section>
+    <section class="boundary"><span class="boundary-icon">i</span><p><b>What this proves</b><br>This gate compares compiler-reported public ledger fields with a reviewed policy. A pass does not certify contract logic, all privacy properties, or transaction metadata.</p></section>
+    <footer>COMPACT PRIVACY CHANGE GATE <span>·</span> COMPILER OUTPUT IS THE SOURCE OF TRUTH</footer>
+  </main>
+</body>
+</html>

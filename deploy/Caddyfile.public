@@ -1,0 +1,31 @@
+{
+	servers {
+		timeouts {
+			read_body 30s
+			read_header 15s
+			write 240s
+			idle 5m
+		}
+	}
+}
+
+{$CPG_PUBLIC_HOSTNAME} {
+	encode zstd gzip
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options "nosniff"
+	X-Frame-Options "DENY"
+		Referrer-Policy "no-referrer"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+	}
+	request_body {
+		max_size 2MiB
+	}
+	reverse_proxy 127.0.0.1:8080 {
+		header_up X-Forwarded-For {http.request.remote.host}
+		transport http {
+			dial_timeout 5s
+			response_header_timeout 240s
+		}
+	}
+}

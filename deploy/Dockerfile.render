@@ -1,0 +1,44 @@
+FROM node:22-bookworm-slim
+
+ARG COMPACT_CLI_VERSION=0.5.1
+ARG COMPACT_TOOLCHAIN_VERSION=0.31.1
+
+ENV NODE_ENV=production \
+    PORT=10000 \
+    CPG_PUBLIC_HOST=0.0.0.0 \
+    CPG_COMPILER_MODE=direct \
+    CPG_COMPILER_VERSION=0.31.1 \
+    CPG_COMPILER_IMAGE=embedded-compact:0.31.1 \
+    COMPACT_DIRECTORY=/opt/compact-home/.compact \
+    PATH=/root/.local/bin:${PATH} \
+    TMPDIR=/tmp
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /opt/compact-home/.compact
+
+RUN curl --proto '=https' --tlsv1.2 -fsSL \
+      "https://github.com/midnightntwrk/compact/releases/download/compact-v${COMPACT_CLI_VERSION}/compact-installer.sh" \
+      -o /tmp/compact-installer.sh \
+ && sh /tmp/compact-installer.sh \
+ && compact --version | grep -Fx "compact ${COMPACT_CLI_VERSION}" \
+ && compact update "${COMPACT_TOOLCHAIN_VERSION}" \
+ && compact compile --version | grep -Fx "${COMPACT_TOOLCHAIN_VERSION}" \
+ && chmod -R a+rX /root/.local /opt/compact-home \
+ && rm -f /tmp/compact-installer.sh
+
+# Fetch compiler parameters during the trusted image build so visitor
+# requests don't need compiler network access for the standard smoke case.
+COPY examples/ledger-schema-smoke.compact /tmp/cpg-image-smoke.compact
+RUN compact compile /tmp/cpg-image-smoke.compact /tmp/cpg-image-smoke-output \
+ && rm -rf /tmp/cpg-image-smoke.compact /tmp/cpg-image-smoke-output \
+ && chmod 0555 /root
+
+WORKDIR /app
+COPY --chown=node:node core.mjs public-inspect.mjs public-server.mjs ./
+COPY --chown=node:node public/ ./public/
+
+USER node
+EXPOSE 10000
+CMD ["node", "public-server.mjs"]

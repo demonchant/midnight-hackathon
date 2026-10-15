@@ -1,0 +1,16 @@
+.git
+node_modules
+contracts/managed
+public-report
+.cpg-work
+.cpg-artifacts
+playwright-report
+test-results
+docs
+reports
+midnight-level-db
+mainnet-wallet-state
+.env
+.env.*
+!.env.example
+*.log

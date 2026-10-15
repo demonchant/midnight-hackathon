@@ -1,0 +1,11 @@
+.env
+.env.mainnet
+mainnet-wallet-state/
+reports/
+.cpg-work/
+.cpg-artifacts/
+node_modules/
+midnight-level-db/
+
+# Public compiler inspection artifacts
+public-report/

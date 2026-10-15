@@ -1,0 +1,37 @@
+FROM ubuntu:24.04
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG COMPACT_CLI_VERSION=0.5.1
+ARG COMPACT_TOOLCHAIN_VERSION=0.31.1
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends ca-certificates curl xz-utils \
+ && rm -rf /var/lib/apt/lists/*
+
+ENV PATH="/root/.local/bin:${PATH}" \
+    COMPACT_DIRECTORY=/opt/compact-home/.compact
+
+# Pin both the installer and compiler release. The build fails if either
+# reported version differs from the requested version.
+RUN curl --proto '=https' --tlsv1.2 -fsSL \
+      "https://github.com/midnightntwrk/compact/releases/download/compact-v${COMPACT_CLI_VERSION}/compact-installer.sh" \
+      -o /tmp/compact-installer.sh \
+ && sh /tmp/compact-installer.sh \
+ && compact --version | grep -Fx "compact ${COMPACT_CLI_VERSION}" \
+ && compact update "${COMPACT_TOOLCHAIN_VERSION}" \
+ && compact compile --version | grep -Fx "${COMPACT_TOOLCHAIN_VERSION}" \
+ && rm -f /tmp/compact-installer.sh \
+ && chmod -R a+rX /opt/compact-home
+
+# Compact lazily fetches its public BLS parameter file on first compilation.
+# Fetch it while building this trusted image so visitor compilation needs no
+# network. Remove the fixture and generated proving output; retain the CLI cache.
+COPY examples/ledger-schema-smoke.compact /tmp/cpg-image-smoke.compact
+RUN compact compile /tmp/cpg-image-smoke.compact /tmp/cpg-image-smoke-output \
+ && rm -rf /tmp/cpg-image-smoke.compact /tmp/cpg-image-smoke-output
+
+RUN chmod 0555 /root /root/.local /root/.local/bin /opt /opt/compact-home
+
+USER 65534:65534
+WORKDIR /work
+ENTRYPOINT ["compact"]

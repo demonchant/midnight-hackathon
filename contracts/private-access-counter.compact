@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: Apache-2.0
+// Demonstrates one private witness checked by a circuit and a public ledger update.
+// This is a teaching/demo contract, not an access-control product for production use.
+pragma language_version 0.23;
+
+import CompactStandardLibrary;
+
+// Public on-chain state. The counter and verifier commitment are deliberately visible.
+export ledger counter: Uint<32>;
+export ledger secret_hash: Bytes<32>;
+
+// Supplied by the user's local private state during circuit execution.
+witness access_witness(): Bytes<32>;
+
+constructor(initialSecret: Bytes<32>) {
+  secret_hash = disclose(persistentHash<Bytes<32>>(initialSecret));
+}
+
+export circuit increment_counter(): [] {
+  const secret = access_witness();
+  assert(persistentHash<Bytes<32>>(secret) == secret_hash, "Invalid access code");
+  counter = (counter + 1) as Uint<32>;
+}

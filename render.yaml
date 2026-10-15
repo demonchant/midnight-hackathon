@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: compact-privacy-change-gate
+    runtime: docker
+    plan: 1c-2g
+    region: oregon
+    dockerfilePath: ./deploy/Dockerfile.render
+    dockerContext: .
+    healthCheckPath: /api/status
+    numInstances: 1
+    envVars:
+      - key: CPG_PUBLIC_HOST
+        value: 0.0.0.0
+      - key: CPG_COMPILER_MODE
+        value: direct
+      - key: CPG_COMPILER_VERSION
+        value: 0.31.1
+      - key: CPG_COMPILER_IMAGE
+        value: embedded-compact:0.31.1
+      - key: CPG_TRUST_PROXY
+        value: render

@@ -1,0 +1,9 @@
+pragma language_version 0.23;
+
+// Compiler integration smoke source, adapted from Midnight's official Hello World tutorial.
+// The message field is intentionally public so a real compiler output can exercise schema review.
+export ledger message: Opaque<"string">;
+
+export circuit storeMessage(newMessage: Opaque<"string">): [] {
+  message = disclose(newMessage);
+}

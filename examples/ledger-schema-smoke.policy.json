@@ -1,0 +1,21 @@
+{
+  "formatVersion": 1,
+  "toolchain": {
+    "compiler": "0.31.1",
+    "language": "0.23.0",
+    "runtime": "0.16.0"
+  },
+  "ledger": [
+    {
+      "name": "message",
+      "index": 0,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Opaque",
+        "tsType": "string"
+      },
+      "reason": "Smoke-test field that exercises the public schema gate. This is not approval to put production message data on the public ledger."
+    }
+  ]
+}

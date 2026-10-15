@@ -1,0 +1,32 @@
+{
+  "formatVersion": 1,
+  "toolchain": {
+    "compiler": "0.31.1",
+    "language": "0.23.0",
+    "runtime": "0.16.0"
+  },
+  "ledger": [
+    {
+      "name": "counter",
+      "index": 0,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Uint",
+        "maxval": 4294967295
+      },
+      "reason": "Intentionally public outcome: the number of successful witness-authorized increments. This teaching contract is not production access control."
+    },
+    {
+      "name": "secret_hash",
+      "index": 1,
+      "exported": true,
+      "storage": "Cell",
+      "type": {
+        "type-name": "Bytes",
+        "length": 32
+      },
+      "reason": "Intentionally public commitment checked against the private witness. It is a public ledger value, not the raw private witness; the construction is illustrative and is not reviewed for production privacy guarantees."
+    }
+  ]
+}
