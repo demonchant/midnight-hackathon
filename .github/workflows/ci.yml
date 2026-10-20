@@ -31,6 +31,8 @@ jobs:
 
       - name: Install supported Compact toolchain
         shell: bash
+        env:
+          COMPACT_DIRECTORY: ${{ runner.temp }}/compact-home/.compact
         run: |
           curl --proto '=https' --tlsv1.2 -LsSf https://github.com/midnightntwrk/compact/releases/download/compact-v0.5.1/compact-installer.sh | sh
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -57,6 +59,8 @@ jobs:
         run: npm run test:public-compiler
 
       - name: Check Render's embedded compiler execution path
+        env:
+          COMPACT_DIRECTORY: ${{ runner.temp }}/compact-home/.compact
         run: CPG_COMPILER_MODE=direct npm run test:public-compiler
 
       - name: Check public upload API and cleanup
