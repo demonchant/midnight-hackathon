@@ -225,8 +225,8 @@ export async function inspectUploaded({ sourceText, policyText, sourceName, poli
       'exec', containerId, 'compact', 'compile',
       '/work/contract.compact', '/work/compiled'
     ], COMPILE_TIMEOUT_MS, null, 16_000, true);
-    if (compilation.code !== 0) {
-      const output = (compilation.stderr || compilation.stdout).trim().slice(-12_000);
+    if (compilation.code !== undefined) {
+      const output = `${compilation.stderr}\n${compilation.stdout}`.trim().slice(-12_000);
       const error = new GateError('COMPILATION_FAILED', 'Compact could not compile this source. No schema policy decision was made.');
       error.details = output || `Compiler exited with status ${compilation.code}.`;
       throw error;
