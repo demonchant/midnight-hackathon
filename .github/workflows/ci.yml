@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     env:
-      COMPACT_DIRECTORY: ${{ runner.temp }}/compact-home/.compact
+      COMPACT_DIRECTORY: ${{ github.workspace }}/.compact
     steps:
       - name: Check out source
         uses: actions/checkout@v5
